@@ -61,6 +61,8 @@ app.get("/", async (req, res) => {
 
 
 app.post("/add", async (req, res) => {
+  const user = await getCurrentUser();
+  const user_id = user.id;
   const input = req.body["country"];
 
   try {
@@ -73,8 +75,8 @@ app.post("/add", async (req, res) => {
     const countryCode = data.country_code;
     try {
       await db.query(
-        "INSERT INTO visited_countries (country_code) VALUES ($1)",
-        [countryCode]
+        "INSERT INTO visited_countries (country_code, user_id) VALUES ($1,$2)",
+        [countryCode,user_id]
       );
       res.redirect("/");
     } catch (err) {
@@ -100,8 +102,8 @@ app.post("/new", async (req, res) => {
   const name = req.body.name;
   const color = req.body.color;
   const result =  await db.query(
-    "INSERT INTO users(name,color) VALUES($1,$2) RETURNING *",
-    [(name, color)]
+    "INSERT INTO users(name,color) VALUES($1,$2) RETURNING *;",
+    [name, color]
   );
   const id = result.rows[0].id;
   currentUserId = id;
